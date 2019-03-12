@@ -8,6 +8,56 @@ go get github.com/sinoz/gokira
 
 ## How To Use
 
+Loading the cache is as easy as:
+
+```
+assetCache, err := cache.LoadCache("cache/", 21)
+```
+
+If you are interested in the raw file data of the underlying file bundle, you can also do:
+
+```
+fileBundle, err := cache.LoadFileBundle("cache/", 21)
+if err != nil {
+    log.Fatal(err)
+}
+
+assetCache, err := cache.NewCache(fileBundle)
+if err != nil {
+    log.Fatal(err)
+}
+```
+
+Developers who aren't very familiar with the cache might only want to use this library for streaming purposes in their server application. The game client expects to receive a collection of pages that together make up a categorized folder. To fetch such a folder:
+
+```
+if archiveId == 255 && folderId == 255 {
+    releaseManifest, err := cache.getReleaseManifest()
+    if err != nil {
+        return nil, err
+    }
+    
+    // encodes the release manifest with all the versions and checksums
+    // of each archive, into a buffer
+    bufLength := len(releaseManifest.Checksums) * 8
+    buf := buffer.NewHeapByteBuffer(bufLength)
+    
+    for i := 0; i < len(releaseManifest.Checksums); i++ {
+    	buf.WriteInt32(int32(releaseManifest.Checksums[i]))
+    	buf.WriteInt32(int32(releaseManifest.Versions[i]))
+    }
+    
+    // reads the written contents into a byte array
+    byteData := buf.ReadSlice(buf.ReadableBytes())
+    
+    // and return it
+    return byteData, nil
+} else {
+    // getFolderPages() returns ([]byte, error)
+    return cache.getFolderPages(archiveId, folderId)
+}
+```
+
 To learn more on how to use this library for your OldSchool RuneScape application, check out the examples directory.
 
 ## FAQ
