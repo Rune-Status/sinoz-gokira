@@ -25,12 +25,7 @@ type Descriptor struct {
 }
 
 func main() {
-	fileBundle, err := cache.LoadFileBundle("cache/", 21)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	assetCache, err := cache.NewCache(fileBundle)
+	assetCache, err := cache.LoadCache("cache/", 21)
 	if err != nil {
 		log.Fatal(err)
 	}
