@@ -1,7 +1,7 @@
 package crypto
 
 import (
-	"github.com/sinoz/gokira/pkg/buffer"
+	"github.com/sinoz/gokira/buffer"
 	"testing"
 )
 

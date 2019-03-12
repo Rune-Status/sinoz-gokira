@@ -2,8 +2,8 @@ package main
 
 import (
 	"errors"
-	"github.com/sinoz/gokira/pkg"
-	"github.com/sinoz/gokira/pkg/buffer"
+	"github.com/sinoz/gokira"
+	"github.com/sinoz/gokira/buffer"
 	"log"
 	"strconv"
 )
@@ -25,7 +25,7 @@ type Descriptor struct {
 }
 
 func main() {
-	assetCache, err := cache.LoadCache("cache/", 21)
+	assetCache, err := gokira.LoadCache("cache/", 21)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -36,7 +36,7 @@ func main() {
 	println(abyssalWhip.Name)        // Abyssal whip
 }
 
-func getDescriptors(cache *cache.Cache) ([]*Descriptor, error) {
+func getDescriptors(cache *gokira.Cache) ([]*Descriptor, error) {
 	archiveManifest, getManifestErr := cache.GetArchiveManifest(2)
 	if getManifestErr != nil {
 		return nil, getManifestErr

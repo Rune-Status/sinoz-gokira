@@ -1,7 +1,8 @@
-package cache
+package gokira
 
 import (
 	"errors"
+	"github.com/sinoz/gokira/crypto"
 	"log"
 )
 

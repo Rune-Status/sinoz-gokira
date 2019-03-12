@@ -1,12 +1,12 @@
 package main
 
 import (
-	"github.com/sinoz/gokira/pkg"
+	"github.com/sinoz/gokira"
 	"log"
 )
 
 func main() {
-	assetCache, err := cache.LoadCache("cache/", 21)
+	assetCache, err := gokira.LoadCache("cache/", 21)
 	if err != nil {
 		log.Fatal(err)
 	}

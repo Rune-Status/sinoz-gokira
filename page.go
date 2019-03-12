@@ -1,4 +1,4 @@
-package cache
+package gokira
 
 import (
 	"encoding/binary"

@@ -1,11 +1,11 @@
-package cache
+package gokira
 
 import (
 	"encoding/binary"
 	"errors"
-	"github.com/sinoz/gokira/pkg/buffer"
-	"github.com/sinoz/gokira/pkg/compression"
-	"github.com/sinoz/gokira/pkg/crypto"
+	"github.com/sinoz/gokira/buffer"
+	"github.com/sinoz/gokira/compression"
+	"github.com/sinoz/gokira/crypto"
 )
 
 const (

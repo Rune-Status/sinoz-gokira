@@ -1,4 +1,4 @@
-package cache
+package gokira
 
 // Asset is a simple asset file inside of a Pack.
 type Asset struct {

@@ -1,8 +1,8 @@
-package cache
+package gokira
 
 import (
 	"fmt"
-	"github.com/sinoz/gokira/pkg/buffer"
+	"github.com/sinoz/gokira/buffer"
 	"hash/crc32"
 )
 

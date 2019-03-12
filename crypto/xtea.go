@@ -1,6 +1,6 @@
 package crypto
 
-import "github.com/sinoz/gokira/pkg/buffer"
+import "github.com/sinoz/gokira/buffer"
 
 const (
 	GoldenRatio int = -1640531527
