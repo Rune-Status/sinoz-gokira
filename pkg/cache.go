@@ -2,8 +2,7 @@ package cache
 
 import (
 	"errors"
-
-	"github.com/sinoz/darkness/pkg/shared/crypto"
+	"log"
 )
 
 const (
@@ -15,6 +14,16 @@ type Cache struct {
 	bundle   *FileBundle
 	mappings *indexTable
 	archives map[int]*Archive
+}
+
+// LoadCache loads a FileBundle from the specified path and wraps it into an instance of a Cache.
+func LoadCache(path string, indexCount int) (*Cache, error) {
+	fileBundle, err := LoadFileBundle(path, indexCount)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	return NewCache(fileBundle)
 }
 
 // NewCache constructs a new file store for the given file bundle. May return an error.

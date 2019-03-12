@@ -2,7 +2,7 @@ package cache
 
 import (
 	"fmt"
-	"github.com/sinoz/darkness/pkg/shared/buffer"
+	"github.com/sinoz/gokira/pkg/buffer"
 	"hash/crc32"
 )
 
