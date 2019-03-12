@@ -28,7 +28,7 @@ if err != nil {
 }
 ```
 
-Developers who aren't very familiar with the cache might only want to use this library for streaming purposes in their server application. The game client expects to receive a collection of pages that together make up a categorized folder. To fetch such a folder:
+Developers who aren't very familiar with the cache might only want to use this library for streaming purposes in their server application. The game client expects to receive a collection of pages that together make up a categorized folder. To fetch such a folder (or the release manifest / update keys):
 
 ```
 if archiveId == 255 && folderId == 255 {
@@ -59,6 +59,20 @@ if archiveId == 255 && folderId == 255 {
 ```
 
 To learn more on how to use this library for your OldSchool RuneScape application, check out the examples directory.
+
+## Extras
+
+#### HeapByteBuffer
+
+GoKira also comes with its own buffer implementation called `HeapByteBuffer` which operates similarily to netty's `ByteBuf`. It grows exponentially when the buffer has reached its limit during a write operation. 
+
+#### Supported Cryptographic/Compression Utilities
+
+- XTEA (deciphering, enciphering)
+- RSA (decrypting, encrypting)
+- DJB2 (One-way hashing)
+- GZIP (Decompression)
+- BZIP2 (Decompression)
 
 ## FAQ
 
