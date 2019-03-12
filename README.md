@@ -11,18 +11,18 @@ go get github.com/sinoz/gokira
 Loading the cache is as easy as:
 
 ```
-assetCache, err := cache.LoadCache("cache/", 21)
+assetCache, err := gokira.LoadCache("cache/", 21)
 ```
 
 If you are interested in the raw file data of the underlying file bundle, you can also do:
 
 ```
-fileBundle, err := cache.LoadFileBundle("cache/", 21)
+fileBundle, err := gokira.LoadFileBundle("cache/", 21)
 if err != nil {
     log.Fatal(err)
 }
 
-assetCache, err := cache.NewCache(fileBundle)
+assetCache, err := gokira.NewCache(fileBundle)
 if err != nil {
     log.Fatal(err)
 }
@@ -32,7 +32,7 @@ Developers who aren't very familiar with the cache might only want to use this l
 
 ```
 if archiveId == 255 && folderId == 255 {
-    releaseManifest, err := cache.getReleaseManifest()
+    releaseManifest, err := assetCache.getReleaseManifest()
     if err != nil {
         return nil, err
     }
