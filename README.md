@@ -6,6 +6,13 @@
 go get github.com/sinoz/gokira
 ```
 
+## Supported Revisions
+
+GoKira has been tested on revisions:
+
+- 177
+- 178
+
 ## How To Use
 
 Loading the cache is as easy as:
@@ -54,7 +61,7 @@ if archiveId == 255 && folderId == 255 {
     return byteData, nil
 } else {
     // getFolderPages() returns ([]byte, error)
-    return cache.getFolderPages(archiveId, folderId)
+    return assetCache.getFolderPages(archiveId, folderId)
 }
 ```
 
@@ -83,3 +90,8 @@ I was watching the anime Death Note and couldn't really think of anything else. 
 #### Does this also support applying cache modifications?
 
 No. The focus of this library is to give developers a cache library to build (server) applications with. Additionally, the Go standard library currently, at the time of this writing, does not support Bzip2 encoding. Although Gzip can be used, perhaps one day.
+
+## Giving Credits
+
+- Sini for some of the namings
+- Authors of OpenRS for illustrating the cache encoding format in their work
