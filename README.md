@@ -1,5 +1,7 @@
 # GoKira
 
+GoKira is your go-to cache library for OldSchool RuneScape, written in Golang.
+
 ## Install
 
 ```
