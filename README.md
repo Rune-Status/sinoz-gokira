@@ -12,6 +12,7 @@ go get github.com/sinoz/gokira
 
 GoKira has been tested on the following revisions of OldSchool RuneScape:
 
+- 149
 - 177
 - 178
 
