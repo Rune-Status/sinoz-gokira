@@ -10,7 +10,7 @@ import (
 
 const ItemConfigId = 10
 
-type Descriptor struct {
+type ItemDescriptor struct {
 	Id                uint32    `yaml:"id"`
 	Name              string    `yaml:"name"`
 	Examine           string    `yaml:"examine"`
@@ -30,13 +30,13 @@ func main() {
 		log.Fatal(err)
 	}
 
-	descriptors, err := getDescriptors(assetCache)
+	descriptors, err := getItemDescriptors(assetCache)
 
 	abyssalWhip := descriptors[4151] // 4151 = Abyssal Whip item
 	println(abyssalWhip.Name)        // Abyssal whip
 }
 
-func getDescriptors(cache *gokira.Cache) ([]*Descriptor, error) {
+func getItemDescriptors(cache *gokira.Cache) ([]*ItemDescriptor, error) {
 	archiveManifest, getManifestErr := cache.GetArchiveManifest(2)
 	if getManifestErr != nil {
 		return nil, getManifestErr
@@ -54,15 +54,15 @@ func getDescriptors(cache *gokira.Cache) ([]*Descriptor, error) {
 	}
 
 	packCount := len(packs)
-	descriptors := make([]*Descriptor, packCount)
+	descriptors := make([]*ItemDescriptor, packCount)
 
 	for id := 0; id < packCount; id++ {
-		descriptors[id] = &Descriptor{Id: uint32(id)}
+		descriptors[id] = &ItemDescriptor{Id: uint32(id)}
 
 		packData := packs[id].Data
 		packBuffer := buffer.HeapByteBufferWrap(packData)
 
-		decodeError := decode(packBuffer, descriptors[id])
+		decodeError := decodeItem(packBuffer, descriptors[id])
 		if decodeError != nil {
 			return nil, decodeError
 		}
@@ -71,7 +71,7 @@ func getDescriptors(cache *gokira.Cache) ([]*Descriptor, error) {
 	return descriptors, nil
 }
 
-func decode(buf *buffer.HeapByteBuffer, descriptor *Descriptor) error {
+func decodeItem(buf *buffer.HeapByteBuffer, descriptor *ItemDescriptor) error {
 	for buf.IsReadable() {
 		id, readErr := buf.ReadByte()
 		if readErr != nil {
