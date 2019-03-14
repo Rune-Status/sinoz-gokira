@@ -2,8 +2,7 @@ package gokira
 
 import (
 	"encoding/binary"
-	"errors"
-	"strconv"
+	"fmt"
 )
 
 const (
@@ -31,8 +30,8 @@ type page struct {
 
 // newPage produces a new page from the given data. May return an error.
 func newPage(buf []byte) (*page, error) {
-	if len(buf) < pageSize {
-		return nil, errors.New("a page should consume at least " + strconv.Itoa(pageSize))
+	if len(buf) < pageHeaderSize {
+		return nil, fmt.Errorf("a page should consume at least %v bytes. Given length of input is %v", pageHeaderSize, len(buf))
 	}
 
 	id := binary.BigEndian.Uint16(buf[0:])
