@@ -22,18 +22,18 @@ GoKira has been tested on the following revisions of OldSchool RuneScape:
 Loading the cache is as easy as:
 
 ```
-assetCache, err := gokira.LoadCache("cache/", 21)
+cache, err := gokira.LoadCache("cache/", 21)
 ```
 
 If you are interested in the raw file data of the underlying file bundle, you can also do:
 
 ```
-fileBundle, err := gokira.LoadFileBundle("cache/", 21)
+bundle, err := gokira.LoadFileBundle("cache/", 21)
 if err != nil {
     log.Fatal(err)
 }
 
-assetCache, err := gokira.NewCache(fileBundle)
+cache, err := gokira.NewCache(bundle)
 if err != nil {
     log.Fatal(err)
 }
