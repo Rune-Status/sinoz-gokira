@@ -15,6 +15,7 @@ GoKira has been tested on the following revisions of OldSchool RuneScape:
 - 149
 - 177
 - 178
+- 187
 
 ## How To Use
 
