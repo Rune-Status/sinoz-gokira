@@ -1,6 +1,6 @@
 # GoKira
 
-GoKira is your go-to cache library for OldSchool RuneScape, written in Golang.
+GoKira is your go-to cache library for OldSchool RuneScape, written in Go.
 
 ## Install
 
@@ -48,13 +48,7 @@ if archiveId == 255 && folderId == 255 {
         return nil, err
     }
 
-    bldr := bytes.NewDefaultBuilder()
-    for i := 0; i < len(releaseManifest.Checksums); i++ {
-    	bldr.WriteInt32(int32(m.Checksums[i]))
-    	bldr.WriteInt32(int32(m.Versions[i]))
-    }
-    
-    return bldr.Build().ToByteArray(), nil
+    return m.Encode(), nil
 }
 
 return cache.getFolderPages(archiveId, folderId)
