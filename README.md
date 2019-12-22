@@ -42,39 +42,30 @@ Developers who aren't very familiar with the cache might only want to use this l
 
 ```
 if archiveId == 255 && folderId == 255 {
-    releaseManifest, err := assetCache.getReleaseManifest()
+    m, err := cache.getReleaseManifest()
     if err != nil {
         return nil, err
     }
-    
-    // encodes the release manifest with all the versions and checksums
-    // of each archive, into a buffer
-    bufLength := len(releaseManifest.Checksums) * 8
-    buf := buffer.NewHeapByteBuffer(bufLength)
-    
+
+    bldr := bytes.NewDefaultBuilder()
     for i := 0; i < len(releaseManifest.Checksums); i++ {
-    	buf.WriteInt32(int32(releaseManifest.Checksums[i]))
-    	buf.WriteInt32(int32(releaseManifest.Versions[i]))
+    	bldr.WriteInt32(int32(m.Checksums[i]))
+    	bldr.WriteInt32(int32(m.Versions[i]))
     }
     
-    // reads the written contents into a byte array
-    byteData := buf.ReadSlice(buf.ReadableBytes())
-    
-    // and return it
-    return byteData, nil
-} else {
-    // getFolderPages() returns ([]byte, error)
-    return assetCache.getFolderPages(archiveId, folderId)
+    return bldr.Build().ToByteArray(), nil
 }
+
+return cache.getFolderPages(archiveId, folderId)
 ```
 
 To learn more on how to use this library for your OldSchool RuneScape application, check out the examples directory.
 
 ## Extras
 
-#### HeapByteBuffer
+#### bytes.String, Iterator and Builder
 
-GoKira also comes with its own buffer implementation called `HeapByteBuffer` which operates similarily to netty's `ByteBuf`. It grows exponentially when the buffer has reached its limit during a write operation. 
+GoKira also comes with its own byte string implementation found within the `bytes` package, which is an immutable rope-like sequence that is designed for efficient byte array concatenation. The `bytes.String` itself is immutable and safe to be passed around goroutines. To read from the `bytes.String` you can use `bs.Iterator()`. To build a new byte string, you can make use of `bytes.NewDefaultBuilder()` which grows exponentially as bytes are written to it. Note that you do *NOT* have to make use of this. This library will never force you to rely on its utilities! Data returned by the cache library will remain in the form of a byte array.
 
 #### Supported Cryptographic/Compression Utilities
 
