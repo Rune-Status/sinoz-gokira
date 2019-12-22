@@ -51,7 +51,7 @@ if archiveId == 255 && folderId == 255 {
     return m.Encode(), nil
 }
 
-return cache.getFolderPages(archiveId, folderId)
+return cache.getFolderPages(archiveId, folderId), nil
 ```
 
 To learn more on how to use this library for your OldSchool RuneScape application, check out the examples directory.
