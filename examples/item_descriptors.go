@@ -2,8 +2,10 @@ package main
 
 import (
 	"errors"
+
 	"github.com/sinoz/gokira"
-	"github.com/sinoz/gokira/buffer"
+	"github.com/sinoz/gokira/bytes"
+
 	"log"
 	"strconv"
 )
@@ -11,7 +13,7 @@ import (
 const ItemConfigId = 10
 
 type ItemDescriptor struct {
-	Id                uint32    `yaml:"id"`
+	ID                uint32    `yaml:"id"`
 	Name              string    `yaml:"name"`
 	Examine           string    `yaml:"examine"`
 	InventoryModel    uint16    `yaml:"inv_model"`
@@ -37,45 +39,43 @@ func main() {
 }
 
 func getItemDescriptors(cache *gokira.Cache) ([]*ItemDescriptor, error) {
-	archiveManifest, getManifestErr := cache.GetArchiveManifest(2)
-	if getManifestErr != nil {
-		return nil, getManifestErr
+	archiveManifest, err := cache.GetArchiveManifest(2)
+	if err != nil {
+		return nil, err
 	}
 
-	folder, folderPageErr := cache.GetUnencryptedFolder(2, ItemConfigId)
-	if folderPageErr != nil {
-		return nil, folderPageErr
+	folder, err := cache.GetUnencryptedFolder(2, ItemConfigId)
+	if err != nil {
+		return nil, err
 	}
 
 	targetFolderManifest := archiveManifest.FolderReferences[ItemConfigId]
-	packs, getPacksErr := folder.GetPacks(targetFolderManifest)
-	if getPacksErr != nil {
-		return nil, getPacksErr
+	packs, err := folder.GetPacks(targetFolderManifest)
+	if err != nil {
+		return nil, err
 	}
 
 	packCount := len(packs)
 	descriptors := make([]*ItemDescriptor, packCount)
 
 	for id := 0; id < packCount; id++ {
-		descriptors[id] = &ItemDescriptor{Id: uint32(id)}
+		descriptors[id] = &ItemDescriptor{ID: uint32(id)}
 
-		packData := packs[id].Data
-		packBuffer := buffer.HeapByteBufferWrap(packData)
-
-		decodeError := decodeItem(packBuffer, descriptors[id])
-		if decodeError != nil {
-			return nil, decodeError
+		packData := bytes.StringWrap(packs[id].Data)
+		if err := decodeItem(packData, descriptors[id]); err != nil {
+			return nil, err
 		}
 	}
 
 	return descriptors, nil
 }
 
-func decodeItem(buf *buffer.HeapByteBuffer, descriptor *ItemDescriptor) error {
-	for buf.IsReadable() {
-		id, readErr := buf.ReadByte()
-		if readErr != nil {
-			return readErr
+func decodeItem(bs *bytes.String, descriptor *ItemDescriptor) (err error) {
+	itr := bs.Iterator()
+	for itr.IsReadable() {
+		id, err := itr.ReadByte()
+		if err != nil {
+			return err
 		}
 
 		if id == 0 {
@@ -84,146 +84,249 @@ func decodeItem(buf *buffer.HeapByteBuffer, descriptor *ItemDescriptor) error {
 
 		switch id {
 		case 1:
-			descriptor.InventoryModel, _ = buf.ReadUInt16()
+			if descriptor.InventoryModel, err = itr.ReadUInt16(); err != nil {
+				return err
+			}
 
 		case 2:
-			descriptor.Name, _ = buf.ReadCString()
+			if descriptor.Name, err = itr.ReadCString(); err != nil {
+				return err
+			}
 
 		case 4:
-			buf.ReadUInt16()
+			if _, err = itr.ReadUInt16(); err != nil {
+				return err
+			}
 
 		case 5:
-			buf.ReadUInt16()
+			if _, err = itr.ReadUInt16(); err != nil {
+				return err
+			}
 
 		case 6:
-			buf.ReadUInt16()
+			if _, err = itr.ReadUInt16(); err != nil {
+				return err
+			}
 
 		case 7:
-			buf.ReadUInt16()
+			if _, err = itr.ReadUInt16(); err != nil {
+				return err
+			}
 
 		case 8:
-			buf.ReadUInt16()
+			if _, err = itr.ReadUInt16(); err != nil {
+				return err
+			}
 
 		case 11:
 			descriptor.Stackable = true
 
 		case 12:
-			descriptor.Cost, _ = buf.ReadUInt32()
+			if descriptor.Cost, err = itr.ReadUInt32(); err != nil {
+				return err
+			}
 
 		case 16:
 			descriptor.Members = true
 
 		case 23:
-			buf.ReadUInt16()
-			buf.ReadByte()
+			if _, err = itr.ReadUInt16(); err != nil {
+				return err
+			}
+			if _, err = itr.ReadByte(); err != nil {
+				return err
+			}
 
 		case 24:
-			buf.ReadUInt16()
+			if _, err = itr.ReadUInt16(); err != nil {
+				return err
+			}
 
 		case 25:
-			buf.ReadUInt16()
-			buf.ReadByte()
+			if _, err = itr.ReadUInt16(); err != nil {
+				return err
+			}
+
+			if _, err = itr.ReadByte(); err != nil {
+				return err
+			}
 
 		case 26:
-			buf.ReadUInt16()
+			if _, err = itr.ReadUInt16(); err != nil {
+				return err
+			}
 
 		case 30, 31, 32, 33, 34:
-			descriptor.FloorOptions[id-30], _ = buf.ReadCString()
+			if descriptor.FloorOptions[id-30], err = itr.ReadCString(); err != nil {
+				return err
+			}
 
 		case 35, 36, 37, 38, 39:
-			descriptor.BagOptions[id-35], _ = buf.ReadCString()
+			if descriptor.BagOptions[id-35], err = itr.ReadCString(); err != nil {
+				return err
+			}
 
 		case 40:
-			count, _ := buf.ReadByte()
+			count, _ := itr.ReadByte()
 			for i := 0; i < int(count); i++ {
-				buf.ReadUInt16()
-				buf.ReadUInt16()
+				if _, err = itr.ReadUInt16(); err != nil {
+					return err
+				}
+
+				if _, err = itr.ReadUInt16(); err != nil {
+					return err
+				}
 			}
 
 		case 41:
-			count, _ := buf.ReadByte()
+			count, _ := itr.ReadByte()
 			for i := 0; i < int(count); i++ {
-				buf.ReadUInt16()
-				buf.ReadUInt16()
+				if _, err = itr.ReadUInt16(); err != nil {
+					return err
+				}
+
+				if _, err = itr.ReadUInt16(); err != nil {
+					return err
+				}
 			}
 
 		case 42:
-			buf.ReadByte()
+			if _, err = itr.ReadByte(); err != nil {
+				return err
+			}
 
 		case 65:
 			// STOCKMARKET
 
 		case 78:
-			buf.ReadUInt16()
+			if _, err = itr.ReadUInt16(); err != nil {
+				return err
+			}
 
 		case 79:
-			buf.ReadUInt16()
+			if _, err = itr.ReadUInt16(); err != nil {
+				return err
+			}
 
 		case 90:
-			buf.ReadUInt16()
+			if _, err = itr.ReadUInt16(); err != nil {
+				return err
+			}
 
 		case 91:
-			buf.ReadUInt16()
+			if _, err = itr.ReadUInt16(); err != nil {
+				return err
+			}
 
 		case 92:
-			buf.ReadUInt16()
+			if _, err = itr.ReadUInt16(); err != nil {
+				return err
+			}
 
 		case 93:
-			buf.ReadUInt16()
+			if _, err = itr.ReadUInt16(); err != nil {
+				return err
+			}
 
 		case 95:
-			buf.ReadUInt16()
+			if _, err = itr.ReadUInt16(); err != nil {
+				return err
+			}
 
 		case 97:
-			buf.ReadUInt16()
+			if _, err = itr.ReadUInt16(); err != nil {
+				return err
+			}
 
 		case 98:
-			buf.ReadUInt16() // TODO noted template??
+			if _, err = itr.ReadUInt16(); err != nil {
+				return err
+			}
 
 		case 100, 101, 102, 103, 104, 105, 106, 107, 108, 109:
-			buf.ReadUInt16()
-			buf.ReadUInt16()
+			if _, err = itr.ReadUInt16(); err != nil {
+				return err
+			}
+
+			if _, err = itr.ReadUInt16(); err != nil {
+				return err
+			}
 
 		case 110:
-			buf.ReadUInt16()
+			if _, err = itr.ReadUInt16(); err != nil {
+				return err
+			}
 
 		case 111:
-			buf.ReadUInt16()
+			if _, err = itr.ReadUInt16(); err != nil {
+				return err
+			}
 
 		case 112:
-			buf.ReadUInt16()
+			if _, err = itr.ReadUInt16(); err != nil {
+				return err
+			}
 
 		case 113:
-			buf.ReadByte()
+			if _, err = itr.ReadByte(); err != nil {
+				return err
+			}
 
 		case 114:
-			buf.ReadByte()
+			if _, err = itr.ReadByte(); err != nil {
+				return err
+			}
 
 		case 115:
-			buf.ReadByte()
+			if _, err = itr.ReadByte(); err != nil {
+				return err
+			}
 
 		case 139:
-			buf.ReadUInt16()
+			if _, err = itr.ReadUInt16(); err != nil {
+				return err
+			}
 
 		case 140:
-			buf.ReadUInt16()
+			if _, err := itr.ReadUInt16(); err != nil {
+				return err
+			}
 
 		case 148:
-			descriptor.BankPlaceholderID, _ = buf.ReadUInt16()
+			if descriptor.BankPlaceholderID, err = itr.ReadUInt16(); err != nil {
+				return err
+			}
 
 		case 149:
-			buf.ReadUInt16()
+			if _, err = itr.ReadUInt16(); err != nil {
+				return err
+			}
 
 		case 249:
-			count, _ := buf.ReadByte()
+			count, err := itr.ReadByte()
+			if err != nil {
+				return err
+			}
 
 			for i := 0; i < int(count); i++ {
-				flag, _ := buf.ReadBool()
-				buf.ReadUInt24()
+				flag, err := itr.ReadBool()
+				if err != nil {
+					return err
+				}
+
+				if _, err = itr.ReadUInt24(); err != nil {
+					return err
+				}
+
 				if flag {
-					buf.ReadCString()
+					if _, err = itr.ReadCString(); err != nil {
+						return err
+					}
+
 				} else {
-					buf.ReadUInt32()
+					if _, err = itr.ReadUInt32(); err != nil {
+						return err
+					}
 				}
 			}
 

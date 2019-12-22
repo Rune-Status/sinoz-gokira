@@ -29,9 +29,9 @@ func LoadCache(path string, indexCount int) (*Cache, error) {
 
 // NewCache constructs a new file store for the given file bundle. May return an error.
 func NewCache(bundle *FileBundle) (*Cache, error) {
-	mappings, loadMappingsError := newIndexTable(bundle)
-	if loadMappingsError != nil {
-		return nil, loadMappingsError
+	mappings, err := newIndexTable(bundle)
+	if err != nil {
+		return nil, err
 	}
 
 	archives := make(map[int]*Archive)
@@ -66,36 +66,36 @@ func (cache *Cache) GetUnencryptedFolder(archive, folderId int) (*Folder, error)
 }
 
 func (cache *Cache) GetFolder(archiveId, folderId int, keySet [4]int) (*Folder, error) {
-	archive, archiveErr := cache.GetArchive(archiveId)
-	if archiveErr != nil {
-		return nil, archiveErr
+	archive, err := cache.GetArchive(archiveId)
+	if err != nil {
+		return nil, err
 	}
 
 	return archive.GetFolder(folderId, keySet)
 }
 
 func (cache *Cache) GetFolderPages(archiveId, folderId int) ([]byte, error) {
-	archive, archiveErr := cache.GetArchive(archiveId)
-	if archiveErr != nil {
-		return nil, archiveErr
+	archive, err := cache.GetArchive(archiveId)
+	if err != nil {
+		return nil, err
 	}
 
 	return archive.GetFolderPages(folderId)
 }
 
 func (cache *Cache) GetArchiveManifest(archiveId int) (*ArchiveManifest, error) {
-	folder, folderPageErr := cache.GetUnencryptedFolder(255, archiveId)
-	if folderPageErr != nil {
-		return nil, folderPageErr
+	folder, err := cache.GetUnencryptedFolder(255, archiveId)
+	if err != nil {
+		return nil, err
 	}
 
 	return newArchiveManifest(archiveId, folder.Data)
 }
 
 func (cache *Cache) GetFolderManifest(archiveId, folderId int) (*FolderManifest, error) {
-	archiveManifest, getManifestErr := cache.GetArchiveManifest(archiveId)
-	if getManifestErr != nil {
-		return nil, getManifestErr
+	archiveManifest, err := cache.GetArchiveManifest(archiveId)
+	if err != nil {
+		return nil, err
 	}
 
 	if len(archiveManifest.FolderReferences) <= folderId {
@@ -106,9 +106,9 @@ func (cache *Cache) GetFolderManifest(archiveId, folderId int) (*FolderManifest,
 }
 
 func (cache *Cache) GetFolderManifestByName(archiveId int, target string) (*FolderManifest, error) {
-	archiveManifest, getManifestErr := cache.GetArchiveManifest(archiveId)
-	if getManifestErr != nil {
-		return nil, getManifestErr
+	archiveManifest, err := cache.GetArchiveManifest(archiveId)
+	if err != nil {
+		return nil, err
 	}
 
 	for _, manifest := range archiveManifest.FolderReferences {

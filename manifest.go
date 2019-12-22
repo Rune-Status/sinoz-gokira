@@ -49,14 +49,14 @@ func newReleaseManifest(cache *Cache) (*ReleaseManifest, error) {
 	}
 
 	for archiveId := 0; archiveId < archiveCount; archiveId++ {
-		archive, getManifestErr := cache.GetArchiveManifest(archiveId)
-		if getManifestErr != nil {
-			return nil, getManifestErr
+		archive, err := cache.GetArchiveManifest(archiveId)
+		if err != nil {
+			return nil, err
 		}
 
-		pages, getPagesErr := cache.GetFolderPages(255, archiveId)
-		if getPagesErr != nil {
-			return nil, getPagesErr
+		pages, err := cache.GetFolderPages(255, archiveId)
+		if err != nil {
+			return nil, err
 		}
 
 		crcTable := crc32.MakeTable(polynomial)
@@ -71,23 +71,37 @@ func newReleaseManifest(cache *Cache) (*ReleaseManifest, error) {
 
 // newArchiveManifest constructs a new ArchiveManifest from the given data. May return an error.
 func newArchiveManifest(id int, data []byte) (*ArchiveManifest, error) {
+	var err error
+
 	itr := bytes.StringWrap(data).Iterator()
 
 	manifest := new(ArchiveManifest)
 	manifest.Id = id
 
-	manifest.Format, _ = itr.ReadByte()
+	manifest.Format, err = itr.ReadByte()
+	if err != nil {
+		return nil, err
+	}
+
 	if manifest.Format < 5 || manifest.Format > 7 {
 		return nil, fmt.Errorf("format out of bounds (5-7) but is %v\n", manifest.Format)
 	}
 
 	if manifest.Format >= 6 {
-		manifest.Version, _ = itr.ReadUInt32()
+		if manifest.Version, err = itr.ReadUInt32(); err != nil {
+			return nil, err
+		}
 	}
 
-	manifest.Directive, _ = itr.ReadByte()
+	if manifest.Directive, err = itr.ReadByte(); err != nil {
+		return nil, err
+	}
 
-	folderCount, _ := itr.ReadUInt16()
+	folderCount, err := itr.ReadUInt16()
+	if err != nil {
+		return nil, err
+	}
+
 	folderIds := make([]int, folderCount)
 
 	accumulator := 0
@@ -96,7 +110,10 @@ func newArchiveManifest(id int, data []byte) (*ArchiveManifest, error) {
 	// read the id of each and every referenced folder in the archive's manifest.
 	// this is due to a sudden padding in between some folders where an id is skipped
 	for i := 0; i < len(folderIds); i++ {
-		idDelta, _ := itr.ReadUInt16()
+		idDelta, err := itr.ReadUInt16()
+		if err != nil {
+			return nil, err
+		}
 
 		accumulator += int(idDelta)
 		folderIds[i] = accumulator
@@ -123,7 +140,10 @@ func newArchiveManifest(id int, data []byte) (*ArchiveManifest, error) {
 		// and if so, we read each label hash
 		for _, folder := range manifest.FolderReferences {
 			if folder != nil {
-				folder.LabelHash, _ = itr.ReadUInt32()
+				folder.LabelHash, err = itr.ReadUInt32()
+				if err != nil {
+					return nil, err
+				}
 			}
 		}
 	}
@@ -131,21 +151,31 @@ func newArchiveManifest(id int, data []byte) (*ArchiveManifest, error) {
 	// read the crc checksum of each folder
 	for _, folder := range manifest.FolderReferences {
 		if folder != nil {
-			folder.Checksum, _ = itr.ReadUInt32()
+			folder.Checksum, err = itr.ReadUInt32()
+			if err != nil {
+				return nil, err
+			}
 		}
 	}
 
 	// read the versions of each folder
 	for _, folder := range manifest.FolderReferences {
 		if folder != nil {
-			folder.Version, _ = itr.ReadUInt32()
+			folder.Version, err = itr.ReadUInt32()
+			if err != nil {
+				return nil, err
+			}
 		}
 	}
 
 	// TODO
 	for _, folder := range manifest.FolderReferences {
 		if folder != nil {
-			packCount, _ := itr.ReadUInt16()
+			packCount, err := itr.ReadUInt16()
+			if err != nil {
+				return nil, err
+			}
+
 			folder.PackReferences = make([]*PackManifest, packCount)
 		}
 	}

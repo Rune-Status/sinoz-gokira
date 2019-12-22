@@ -15,9 +15,9 @@ func newArchive(id int, storage *Cache) *Archive {
 
 // GetFolder produces a Folder of pages. May return an error.
 func (archive *Archive) GetFolder(id int, keySet [4]int) (*Folder, error) {
-	pages, folderPagesErr := archive.GetFolderPages(id)
-	if folderPagesErr != nil {
-		return nil, folderPagesErr
+	pages, err := archive.GetFolderPages(id)
+	if err != nil {
+		return nil, err
 	}
 
 	return newFolder(pages, keySet)
@@ -26,9 +26,9 @@ func (archive *Archive) GetFolder(id int, keySet [4]int) (*Folder, error) {
 // GetFolderPages collects a set of raw pages that together make up the requested folder.
 // May throw an error.
 func (archive *Archive) GetFolderPages(folderId int) ([]byte, error) {
-	folderMapping, getError := archive.storage.mappings.GetIndex(archive.Id, folderId)
-	if getError != nil {
-		return nil, getError
+	folderMapping, err := archive.storage.mappings.GetIndex(archive.Id, folderId)
+	if err != nil {
+		return nil, err
 	}
 
 	offset := folderMapping.address
@@ -39,9 +39,9 @@ func (archive *Archive) GetFolderPages(folderId int) ([]byte, error) {
 
 	for remaining > 0 {
 		pageData := archive.storage.bundle.mainResource[offset:]
-		page, pageError := newPage(pageData)
-		if pageError != nil {
-			return nil, pageError
+		page, err := newPage(pageData)
+		if err != nil {
+			return nil, err
 		}
 
 		if int(page.position) != pageId {

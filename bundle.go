@@ -27,17 +27,17 @@ func LoadFileBundle(rootPath string, indexCount int) (*FileBundle, error) {
 	bundle := new(FileBundle)
 
 	mainFilePath := rootPath + "/main_file_cache.dat2"
-	mainResource, storeLoadErr := ioutil.ReadFile(mainFilePath)
-	if storeLoadErr != nil {
-		return nil, storeLoadErr
+	mainResource, err := ioutil.ReadFile(mainFilePath)
+	if err != nil {
+		return nil, err
 	}
 
 	bundle.mainResource = mainResource
 
 	for idxId := 0; idxId < indexCount; idxId++ {
 		indexFilePath := rootPath + "/main_file_cache.idx" + strconv.Itoa(idxId)
-		idxResource, idxFileLoadErr := ioutil.ReadFile(indexFilePath)
-		if idxFileLoadErr != nil {
+		idxResource, err := ioutil.ReadFile(indexFilePath)
+		if err != nil {
 			break
 		}
 
@@ -45,9 +45,9 @@ func LoadFileBundle(rootPath string, indexCount int) (*FileBundle, error) {
 	}
 
 	manifestFilePath := rootPath + "/main_file_cache.idx255"
-	manifestResource, manifestLoadErr := ioutil.ReadFile(manifestFilePath)
-	if manifestLoadErr != nil {
-		return nil, manifestLoadErr
+	manifestResource, err := ioutil.ReadFile(manifestFilePath)
+	if err != nil {
+		return nil, err
 	}
 
 	bundle.manifestResource = manifestResource

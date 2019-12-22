@@ -4,6 +4,7 @@ import (
 	"encoding/binary"
 	"errors"
 
+	"github.com/sinoz/gokira/bytes"
 	"github.com/sinoz/gokira/compression"
 	"github.com/sinoz/gokira/crypto"
 )
@@ -112,7 +113,7 @@ func decompressFolder(compressedData []byte, decompressedLength uint32, compress
 	}
 }
 
-func (folder *Folder) GetPacks(manifest *FolderManifest) ([]*Pack, error) {
+func (folder *Folder) GetPacks(manifest *FolderManifest) ([]*Pack, error) { // TODO handle errors properly
 	folderSizeInBytes := len(folder.Data)
 
 	amtPacks := len(manifest.PackReferences)
@@ -122,6 +123,8 @@ func (folder *Folder) GetPacks(manifest *FolderManifest) ([]*Pack, error) {
 
 	controlInfoOffset := folderSizeInBytes - 1 - amtChunks*amtPacks*4
 	controlInfoBytes := folder.Data[controlInfoOffset:]
+
+	controlInfo := bytes.StringWrap(controlInfoBytes).Iterator()
 
 	chunkSizes := make([][]int, amtChunks)
 	for chunk := range chunkSizes {
@@ -134,9 +137,14 @@ func (folder *Folder) GetPacks(manifest *FolderManifest) ([]*Pack, error) {
 		var chunkSize int
 
 		for pack := 0; pack < amtPacks; pack++ {
-			delta := int(binary.BigEndian.Uint32(controlInfoBytes[chunk*pack*4:]))
+			delta, err := controlInfo.ReadUInt32()
+			if err != nil {
+				return nil, err
+			}
 
-			chunkSize += delta
+			actualDelta := int32(delta)
+
+			chunkSize += int(actualDelta)
 			chunkSizes[chunk][pack] = chunkSize
 
 			fileSizes[pack] += chunkSize

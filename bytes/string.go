@@ -136,10 +136,10 @@ func (i *Iterator) ReadByte() (byte, error) {
 	return value, err
 }
 
-// ReadBoolean reads a single byte at the current index, advances the index
+// ReadBool reads a single byte at the current index, advances the index
 // after reading it and returns it as a boolean value. May return an error
 // if the index is out of bounds.
-func (i *Iterator) ReadBoolean() (bool, error) {
+func (i *Iterator) ReadBool() (bool, error) {
 	value, err := i.ReadByte()
 	if err != nil {
 		return false, err
