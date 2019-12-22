@@ -187,3 +187,15 @@ func newArchiveManifest(id int, data []byte) (*ArchiveManifest, error) {
 func (manifest *ArchiveManifest) containsLabels() bool {
 	return manifest.Directive != 0
 }
+
+// Encode encodes the checksums and versions of this manifest into
+// byte array.
+func (manifest *ReleaseManifest) Encode() []byte {
+	bldr := bytes.NewDefaultBuilder()
+	for i := 0; i < len(manifest.Checksums); i++ {
+		bldr.WriteInt32(int32(manifest.Checksums[i]))
+		bldr.WriteInt32(int32(manifest.Versions[i]))
+	}
+
+	return bldr.Build().ToByteArray()
+}
