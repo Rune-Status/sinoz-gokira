@@ -3,7 +3,7 @@ package gokira
 import (
 	"encoding/binary"
 	"errors"
-	"github.com/sinoz/gokira/buffer"
+
 	"github.com/sinoz/gokira/compression"
 	"github.com/sinoz/gokira/crypto"
 )
@@ -47,10 +47,7 @@ func newFolder(data []byte, keySet [4]int) (*Folder, error) {
 		copy(encryptedBlock, folderPayload[:sizeEncryptedBlock])
 
 		// and now we can safely decipher the block
-		decipherErr := crypto.DecipherXTEA(buffer.HeapByteBufferWrap(encryptedBlock), keySet)
-		if decipherErr != nil {
-			return nil, decipherErr
-		}
+		crypto.DecipherXTEA(encryptedBlock, keySet)
 
 		// and assign the folder payload with the decrypted block
 		folderPayload = encryptedBlock
@@ -124,9 +121,7 @@ func (folder *Folder) GetPacks(manifest *FolderManifest) ([]*Pack, error) {
 	packs := make([]*Pack, amtPacks)
 
 	controlInfoOffset := folderSizeInBytes - 1 - amtChunks*amtPacks*4
-	controlInfoBlock := folder.Data[controlInfoOffset:]
-
-	controlInfo := buffer.HeapByteBufferWrap(controlInfoBlock)
+	controlInfoBytes := folder.Data[controlInfoOffset:]
 
 	chunkSizes := make([][]int, amtChunks)
 	for chunk := range chunkSizes {
@@ -139,10 +134,9 @@ func (folder *Folder) GetPacks(manifest *FolderManifest) ([]*Pack, error) {
 		var chunkSize int
 
 		for pack := 0; pack < amtPacks; pack++ {
-			delta, _ := controlInfo.ReadUInt32()
-			actualDelta := int32(delta)
+			delta := int(binary.BigEndian.Uint32(controlInfoBytes[chunk*pack*4:]))
 
-			chunkSize += int(actualDelta)
+			chunkSize += delta
 			chunkSizes[chunk][pack] = chunkSize
 
 			fileSizes[pack] += chunkSize

@@ -2,8 +2,9 @@ package gokira
 
 import (
 	"fmt"
-	"github.com/sinoz/gokira/buffer"
 	"hash/crc32"
+
+	"github.com/sinoz/gokira/bytes"
 )
 
 const polynomial = 0xEDB88320
@@ -70,23 +71,23 @@ func newReleaseManifest(cache *Cache) (*ReleaseManifest, error) {
 
 // newArchiveManifest constructs a new ArchiveManifest from the given data. May return an error.
 func newArchiveManifest(id int, data []byte) (*ArchiveManifest, error) {
-	buf := buffer.HeapByteBufferWrap(data)
+	itr := bytes.StringWrap(data).Iterator()
 
 	manifest := new(ArchiveManifest)
 	manifest.Id = id
 
-	manifest.Format, _ = buf.ReadByte()
+	manifest.Format, _ = itr.ReadByte()
 	if manifest.Format < 5 || manifest.Format > 7 {
 		return nil, fmt.Errorf("format out of bounds (5-7) but is %v\n", manifest.Format)
 	}
 
 	if manifest.Format >= 6 {
-		manifest.Version, _ = buf.ReadUInt32()
+		manifest.Version, _ = itr.ReadUInt32()
 	}
 
-	manifest.Directive, _ = buf.ReadByte()
+	manifest.Directive, _ = itr.ReadByte()
 
-	folderCount, _ := buf.ReadUInt16()
+	folderCount, _ := itr.ReadUInt16()
 	folderIds := make([]int, folderCount)
 
 	accumulator := 0
@@ -95,7 +96,7 @@ func newArchiveManifest(id int, data []byte) (*ArchiveManifest, error) {
 	// read the id of each and every referenced folder in the archive's manifest.
 	// this is due to a sudden padding in between some folders where an id is skipped
 	for i := 0; i < len(folderIds); i++ {
-		idDelta, _ := buf.ReadUInt16()
+		idDelta, _ := itr.ReadUInt16()
 
 		accumulator += int(idDelta)
 		folderIds[i] = accumulator
@@ -122,7 +123,7 @@ func newArchiveManifest(id int, data []byte) (*ArchiveManifest, error) {
 		// and if so, we read each label hash
 		for _, folder := range manifest.FolderReferences {
 			if folder != nil {
-				folder.LabelHash, _ = buf.ReadUInt32()
+				folder.LabelHash, _ = itr.ReadUInt32()
 			}
 		}
 	}
@@ -130,21 +131,21 @@ func newArchiveManifest(id int, data []byte) (*ArchiveManifest, error) {
 	// read the crc checksum of each folder
 	for _, folder := range manifest.FolderReferences {
 		if folder != nil {
-			folder.Checksum, _ = buf.ReadUInt32()
+			folder.Checksum, _ = itr.ReadUInt32()
 		}
 	}
 
 	// read the versions of each folder
 	for _, folder := range manifest.FolderReferences {
 		if folder != nil {
-			folder.Version, _ = buf.ReadUInt32()
+			folder.Version, _ = itr.ReadUInt32()
 		}
 	}
 
 	// TODO
 	for _, folder := range manifest.FolderReferences {
 		if folder != nil {
-			packCount, _ := buf.ReadUInt16()
+			packCount, _ := itr.ReadUInt16()
 			folder.PackReferences = make([]*PackManifest, packCount)
 		}
 	}
