@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"hash/crc32"
 
-	"github.com/sinoz/gokira/bytes"
+	"github.com/sinoz/bytecat"
 )
 
 const polynomial = 0xEDB88320
@@ -73,7 +73,7 @@ func newReleaseManifest(cache *Cache) (*ReleaseManifest, error) {
 func newArchiveManifest(id int, data []byte) (*ArchiveManifest, error) {
 	var err error
 
-	itr := bytes.StringWrap(data).Iterator()
+	itr := bytecat.StringWrap(data).Iterator()
 
 	manifest := new(ArchiveManifest)
 	manifest.Id = id
@@ -191,7 +191,7 @@ func (manifest *ArchiveManifest) containsLabels() bool {
 // Encode encodes the checksums and versions of this manifest into
 // byte array.
 func (manifest *ReleaseManifest) Encode() []byte {
-	bldr := bytes.NewDefaultBuilder()
+	bldr := bytecat.NewDefaultBuilder()
 	for i := 0; i < len(manifest.Checksums); i++ {
 		bldr.WriteInt32(int32(manifest.Checksums[i]))
 		bldr.WriteInt32(int32(manifest.Versions[i]))

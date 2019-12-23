@@ -4,7 +4,7 @@ import (
 	"encoding/binary"
 	"errors"
 
-	"github.com/sinoz/gokira/bytes"
+	"github.com/sinoz/bytecat"
 	"github.com/sinoz/gokira/compression"
 	"github.com/sinoz/gokira/crypto"
 )
@@ -124,7 +124,7 @@ func (folder *Folder) GetPacks(manifest *FolderManifest) ([]*Pack, error) { // T
 	controlInfoOffset := folderSizeInBytes - 1 - amtChunks*amtPacks*4
 	controlInfoBytes := folder.Data[controlInfoOffset:]
 
-	controlInfo := bytes.StringWrap(controlInfoBytes).Iterator()
+	controlInfo := bytecat.StringWrap(controlInfoBytes).Iterator()
 
 	chunkSizes := make([][]int, amtChunks)
 	for chunk := range chunkSizes {
