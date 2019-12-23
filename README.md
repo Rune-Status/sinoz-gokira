@@ -58,10 +58,6 @@ To learn more on how to use this library for your OldSchool RuneScape applicatio
 
 ## Extras
 
-#### bytes.String, Iterator and Builder
-
-GoKira also comes with its own byte string implementation found within the `bytes` package, which is an immutable rope-like sequence that is designed for efficient byte array concatenation. The `bytes.String` itself is immutable and safe to be passed around goroutines. To read from the `bytes.String` you can use `bs.Iterator()`. To build a new byte string, you can make use of `bytes.NewDefaultBuilder()` which grows exponentially as bytes are written to it. Note that you do *NOT* have to make use of this. This library will never force you to rely on its utilities! Data returned by the cache library will remain in the form of a byte array.
-
 #### Supported Cryptographic/Compression Utilities
 
 - XTEA (deciphering, enciphering)
