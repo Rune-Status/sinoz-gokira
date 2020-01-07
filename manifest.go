@@ -192,6 +192,10 @@ func (manifest *ArchiveManifest) containsLabels() bool {
 // byte array.
 func (manifest *ReleaseManifest) Encode() []byte {
 	bldr := bytecat.NewDefaultBuilder()
+
+	bldr.WriteByte(0) // no compression
+	bldr.WriteInt32(int32(len(manifest.Checksums) * 8))
+
 	for i := 0; i < len(manifest.Checksums); i++ {
 		bldr.WriteInt32(int32(manifest.Checksums[i]))
 		bldr.WriteInt32(int32(manifest.Versions[i]))
